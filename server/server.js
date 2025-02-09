@@ -13,13 +13,13 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 
-// CORS configuration
+// Allow only your frontend URL
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174'], // Add your client URLs
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  origin: "https://event-hub-bay-six.vercel.app",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // Allow cookies/auth headers if needed
 };
+
 
 // Apply CORS to Express
 app.use(cors(corsOptions));
