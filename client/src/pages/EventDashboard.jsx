@@ -116,9 +116,9 @@ function EventDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black/50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 pt-32 pb-20 px-4">
+      <div className="bg-gradient-to-br from-violet-600 via-indigo-700 to-purple-800 pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -134,7 +134,7 @@ function EventDashboard() {
             {user && (
               <Link
                 to="/events/create"
-                className="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-full hover:bg-blue-50 transition-colors font-medium space-x-2 shadow-lg"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-full transition-all duration-300 font-medium space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <Plus className="w-5 h-5" />
                 <span>Create New Event</span>
@@ -144,7 +144,7 @@ function EventDashboard() {
 
           {/* Search and Filter */}
           <div className="mt-8 max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 grid md:grid-cols-3 gap-4">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg p-4 md:p-6 grid md:grid-cols-3 gap-4">
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -179,7 +179,7 @@ function EventDashboard() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Tabs */}
         <div className="flex justify-center mb-12">
-          <nav className="flex space-x-2 bg-white rounded-full p-1 shadow-md">
+          <nav className="flex space-x-2 bg-white/10 backdrop-blur-sm rounded-full p-1 shadow-lg border border-white/10">
             {Object.values(TABS).map((tab) => (
               <button
                 key={tab}
@@ -187,8 +187,8 @@ function EventDashboard() {
                 className={`
                   px-6 py-2 rounded-full font-medium text-sm transition-all
                   ${activeTab === tab
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-sm'
+                    : 'text-gray-300 hover:text-white'
                   }
                 `}
               >
@@ -220,7 +220,7 @@ function EventDashboard() {
             <motion.div 
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"
+              className="w-12 h-12 border-4 border-violet-500 border-t-transparent rounded-full"
             />
           </div>
         ) : (
@@ -234,7 +234,7 @@ function EventDashboard() {
               <motion.div
                 key={event._id}
                 variants={itemVariants}
-                className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+                className="group bg-white/10 backdrop-blur-lg rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-white/10 hover:border-violet-500/30"
               >
                 <Link to={`/events/${event._id}`}>
                   <div className="relative">
@@ -245,52 +245,52 @@ function EventDashboard() {
                         className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                      <div className="w-full h-48 bg-gradient-to-br from-violet-500/80 to-purple-600/80 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                         <span className="text-white text-2xl font-bold">
                           {event.name.charAt(0)}
                         </span>
                       </div>
                     )}
                     <div className="absolute top-4 left-4">
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-blue-600 text-xs font-medium rounded-full">
+                      <span className="px-3 py-1 bg-white/10 backdrop-blur-sm text-violet-300 text-xs font-medium rounded-full border border-white/20">
                         {event.category}
                       </span>
                     </div>
                   </div>
                   
                   <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-violet-400 transition-colors">
                       {event.name}
                     </h3>
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-4">
+                    <p className="text-gray-300 text-sm line-clamp-2 mb-4">
                       {event.description}
                     </p>
                     
                     <div className="space-y-3">
-                      <div className="flex items-center text-gray-600">
-                        <Calendar className="w-4 h-4 mr-2" />
+                      <div className="flex items-center text-gray-300">
+                        <Calendar className="w-4 h-4 mr-2 text-violet-400" />
                         <span className="text-sm">
                           {new Date(event.date).toLocaleDateString()}
                         </span>
                       </div>
-                      <div className="flex items-center text-gray-600">
-                        <Clock className="w-4 h-4 mr-2" />
+                      <div className="flex items-center text-gray-300">
+                        <Clock className="w-4 h-4 mr-2 text-violet-400" />
                         <span className="text-sm">{event.time}</span>
                       </div>
-                      <div className="flex items-center text-gray-600">
-                        <MapPin className="w-4 h-4 mr-2" />
+                      <div className="flex items-center text-gray-300">
+                        <MapPin className="w-4 h-4 mr-2 text-violet-400" />
                         <span className="text-sm">{event.location}</span>
                       </div>
                     </div>
 
                     <div className="mt-6 flex items-center justify-between">
-                      <div className="flex items-center text-gray-600">
-                        <Users className="w-5 h-5 mr-2" />
+                      <div className="flex items-center text-gray-300">
+                        <Users className="w-5 h-5 mr-2 text-violet-400" />
                         <span className="text-sm">
                           {event.attendees?.length || 0} attending
                         </span>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-blue-600 group-hover:translate-x-1 transition-transform" />
+                      <ChevronRight className="w-5 h-5 text-violet-400 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
                 </Link>
@@ -305,15 +305,15 @@ function EventDashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-12"
           >
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-white/10 text-violet-400 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10">
               <Calendar className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-white mb-2">
               No events found
               {filter.category && ` in ${filter.category}`}
               {filter.search && ` matching "${filter.search}"`}
             </h3>
-            <p className="text-gray-500">
+            <p className="text-gray-300">
               {activeTab === TABS.UPCOMING 
                 ? "Try adjusting your filters or create a new event!"
                 : activeTab === TABS.TODAY

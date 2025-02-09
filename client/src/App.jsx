@@ -15,7 +15,7 @@ function App() {
   return (
     <Provider store={store}>
       <Router>
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-[url('/bg.jpg')] bg-cover bg-center">
           <SocketInitializer />
           <Navbar />
           <main className="container mx-auto px-4 py-8">

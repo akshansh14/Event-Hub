@@ -160,16 +160,13 @@ function EventDetails() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="min-h-screen bg-gray-50 pt-20"
+      className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-20"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <motion.div 
-          variants={itemVariants}
-          className="mb-6"
-        >
+        <motion.div variants={itemVariants} className="mb-6">
           <Link
             to="/events"
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+            className="inline-flex items-center text-violet-400 hover:text-violet-300 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             <span className="font-medium">Back to Events</span>
@@ -178,7 +175,7 @@ function EventDetails() {
 
         <motion.div 
           variants={itemVariants}
-          className="bg-white rounded-xl shadow-sm overflow-hidden"
+          className="bg-white/10 backdrop-blur-lg rounded-xl shadow-xl overflow-hidden border border-gray-100/10"
         >
           {event.image ? (
             <motion.img
@@ -187,7 +184,7 @@ function EventDetails() {
               transition={{ duration: 0.6 }}
               src={event.image}
               alt={event.name}
-              className="w-full h-64 object-cover"
+              className="w-full h-64 object-contain"
             />
           ) : (
             <motion.div 
@@ -206,7 +203,7 @@ function EventDetails() {
               variants={itemVariants}
               className="flex items-center justify-between mb-4"
             >
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+              <span className="px-3 py-1 bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-violet-300 text-sm font-medium rounded-full backdrop-blur-sm">
                 {event.category}
               </span>
               {user && !isCreator && (
@@ -215,10 +212,10 @@ function EventDetails() {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleAttendance}
                   className={`
-                    px-6 py-2 rounded-full font-medium transition-colors
+                    px-6 py-2 rounded-full font-medium transition-all duration-300
                     ${isUserAttending 
-                      ? "bg-red-100 text-red-600 hover:bg-red-200"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
+                      ? "bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white"
+                      : "bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
                     }
                   `}
                 >
@@ -241,7 +238,7 @@ function EventDetails() {
 
             <motion.h1 
               variants={itemVariants}
-              className="text-3xl font-bold text-gray-900 mb-4"
+              className="text-3xl font-bold text-white mb-4"
             >
               {event.name}
             </motion.h1>
@@ -251,20 +248,20 @@ function EventDetails() {
               className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
             >
               <div className="space-y-4">
-                <div className="flex items-center text-gray-600">
-                  <Calendar className="w-5 h-5 mr-2" />
+                <div className="flex items-center text-gray-300">
+                  <Calendar className="w-5 h-5 mr-2 text-violet-400" />
                   <span>{new Date(event.date).toLocaleDateString()}</span>
                 </div>
-                <div className="flex items-center text-gray-600">
-                  <Clock className="w-5 h-5 mr-2" />
+                <div className="flex items-center text-gray-300">
+                  <Clock className="w-5 h-5 mr-2 text-violet-400" />
                   <span>{event.time}</span>
                 </div>
-                <div className="flex items-center text-gray-600">
-                  <MapPin className="w-5 h-5 mr-2" />
+                <div className="flex items-center text-gray-300">
+                  <MapPin className="w-5 h-5 mr-2 text-violet-400" />
                   <span>{event.location}</span>
                 </div>
-                <div className="flex items-center text-gray-600">
-                  <User className="w-5 h-5 mr-2" />
+                <div className="flex items-center text-gray-300">
+                  <User className="w-5 h-5 mr-2 text-violet-400" />
                   <span>Created by {event.creator?.name}</span>
                 </div>
               </div>
@@ -273,8 +270,8 @@ function EventDetails() {
                 variants={itemVariants}
                 className="space-y-4"
               >
-                <h3 className="font-semibold text-gray-900">Description</h3>
-                <p className="text-gray-600 whitespace-pre-wrap">
+                <h3 className="font-semibold text-violet-300">Description</h3>
+                <p className="text-gray-300 whitespace-pre-wrap">
                   {event.description}
                 </p>
               </motion.div>
@@ -282,10 +279,10 @@ function EventDetails() {
 
             <motion.div 
               variants={itemVariants}
-              className="border-t pt-6"
+              className="border-t border-gray-700 pt-6"
             >
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <Users className="w-5 h-5 mr-2" />
+              <h3 className="font-semibold text-violet-300 mb-4 flex items-center">
+                <Users className="w-5 h-5 mr-2 text-violet-400" />
                 Attendees ({event.attendees?.length || 0})
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

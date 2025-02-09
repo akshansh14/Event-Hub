@@ -87,49 +87,46 @@ function Navbar() {
   return (
     <>
       {/* Main Navigation */}
-      <nav className="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg fixed w-full top-0 z-40">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center py-4">
-            <Link to="/" className="text-2xl font-bold tracking-tight hover:text-blue-100 transition-colors">
-              <span className="text-yellow-400">Event</span>Hub
-            </Link>
-            <div className="flex items-center space-x-6">
+      <nav className="fixed w-full z-50 bg-gradient-to-r from-gray-900/80 to-gray-800/80 backdrop-blur-lg border-b border-gray-700/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-purple-500 text-transparent bg-clip-text">
+                EventHub
+              </Link>
+            </div>
+            
+            <div className="flex items-center space-x-4">
               {user ? (
-                <div className="flex items-center space-x-6">
-                  <button 
-                    onClick={() => setIsMyEventsOpen(true)}
-                    className="flex items-center space-x-1 hover:text-blue-100 transition-colors text-sm md:text-base"
+                <>
+                  <Link
+                    to="/events/create"
+                    className="px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-full transition-all duration-300 transform hover:-translate-y-0.5"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    <span>My Events</span>
-                  </button>
-                  <button 
+                    Create Event
+                  </Link>
+                  <button
                     onClick={handleLogout}
-                    className="flex items-center space-x-1 hover:text-blue-100 transition-colors text-sm md:text-base"
+                    className="px-4 py-2 bg-gradient-to-r from-pink-500 to-red-600 hover:from-pink-600 hover:to-red-700 text-white rounded-full transition-all duration-300 transform hover:-translate-y-0.5"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    <span>Logout</span>
+                    Logout
                   </button>
-                </div>
+                </>
               ) : (
-                <div className="flex items-center space-x-4">
-                  <Link 
-                    to="/login" 
-                    className="hover:text-blue-100 transition-colors text-sm md:text-base"
+                <>
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-full transition-all duration-300 transform hover:-translate-y-0.5"
                   >
                     Login
                   </Link>
-                  <Link 
-                    to="/register" 
-                    className="bg-white text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition-colors text-sm md:text-base font-medium"
+                  <Link
+                    to="/register"
+                    className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-full transition-all duration-300 transform hover:-translate-y-0.5"
                   >
                     Register
                   </Link>
-                </div>
+                </>
               )}
             </div>
           </div>
