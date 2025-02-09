@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import { API_URL } from '../api/config';
 
 class SocketService {
   constructor() {
@@ -7,18 +8,25 @@ class SocketService {
 
   connect() {
     if (!this.socket) {
-      this.socket = io('http://localhost:5000', {
+      this.socket = io(API_URL, {
+        withCredentials: true,
+        transports: ['websocket'],
         auth: {
           token: localStorage.getItem('token')
         }
       });
 
+      // Add connection event handlers
       this.socket.on('connect', () => {
         console.log('Socket connected');
       });
 
       this.socket.on('connect_error', (error) => {
         console.error('Socket connection error:', error);
+      });
+
+      this.socket.on('disconnect', () => {
+        console.log('Socket disconnected');
       });
     }
     return this.socket;
@@ -41,6 +49,12 @@ class SocketService {
     if (this.socket) {
       this.socket.emit('leaveEvent', { eventId });
     }
+  }
+
+  // Add method to handle reconnection
+  reconnect() {
+    this.disconnect();
+    return this.connect();
   }
 }
 

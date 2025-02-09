@@ -1,17 +1,28 @@
 import { useEffect } from "react"
-import { useDispatch } from "react-redux"
+import { useSelector } from "react-redux"
 import socketService from "../utils/socketService"
 
 function SocketInitializer() {
-  const dispatch = useDispatch()
+  const user = useSelector((state) => state.auth.user)
 
   useEffect(() => {
-    // Initialize socket connection if user is logged in
-    const token = localStorage.getItem('token')
-    if (token) {
-      socketService.connect()
+    if (user) {
+      const socket = socketService.connect()
+
+      // Handle socket events
+      socket.on('eventUpdated', (data) => {
+        console.log('Event updated:', data)
+      })
+
+      socket.on('eventCancelled', (data) => {
+        console.log('Event cancelled:', data)
+      })
+
+      return () => {
+        socketService.disconnect()
+      }
     }
-  }, [dispatch])
+  }, [user])
 
   return null
 }

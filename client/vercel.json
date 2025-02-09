@@ -41,6 +41,6 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "your-api-url-here"
+    "VITE_FRONTEND_URL": "https://event-hub-x721.onrender.com"
   }
 } 

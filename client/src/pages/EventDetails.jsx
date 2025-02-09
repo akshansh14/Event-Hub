@@ -56,48 +56,51 @@ function EventDetails() {
   };
 
   useEffect(() => {
-    dispatch(getEventById(id))
+    if (!user) return;
 
-    // Connect to socket and join event room
-    const socket = socketService.connect()
-    socketService.joinEventRoom(id)
+    dispatch(getEventById(id));
+    const socket = socketService.connect();
+    
+    // Join event room
+    socketService.joinEventRoom(id);
 
     // Socket event listeners
     socket.on('viewerCount', ({ count }) => {
-      setViewerCount(count)
-    })
+      setViewerCount(count);
+    });
 
     socket.on('eventUpdated', (data) => {
       if (data.eventId === id) {
-        if (data.type === 'newAttendee') {
+        if (data.type === 'newAttendee' || data.type === 'attendeeLeft') {
           // Update attendees list in real-time
           dispatch(updateEventAttendees({
             eventId: data.eventId,
             attendees: data.attendees
           }));
           toast.success(data.message);
-        } else {
+        } else if (data.type === 'eventModified') {
           // Refresh full event data for other updates
           dispatch(getEventById(id));
+          toast.success(data.message);
         }
       }
-    })
+    });
 
     socket.on('eventCancelled', (data) => {
       if (data.eventId === id) {
-        toast.error(data.message)
-        navigate('/events')
+        toast.error(data.message);
+        navigate('/events');
       }
-    })
+    });
 
     // Cleanup
     return () => {
-      socketService.leaveEventRoom(id)
-      socket.off('viewerCount')
-      socket.off('eventUpdated')
-      socket.off('eventCancelled')
-    }
-  }, [dispatch, id, navigate])
+      socketService.leaveEventRoom(id);
+      socket.off('viewerCount');
+      socket.off('eventUpdated');
+      socket.off('eventCancelled');
+    };
+  }, [dispatch, id, navigate, user]);
 
   // Add this function to format join date
   const formatJoinDate = (date) => {

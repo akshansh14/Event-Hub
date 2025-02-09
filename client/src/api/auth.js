@@ -1,32 +1,34 @@
-import axiosInstance from '../utils/axios';
+import { axiosInstance } from './config'
 
-export const login = async (email, password) => {
-  const response = await axiosInstance.post('/auth/login', { email, password });
+export const loginUser = async (credentials) => {
+  const response = await axiosInstance.post('/api/auth/login', credentials)
   if (response.data.token) {
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('user', JSON.stringify(response.data.user));
   }
   return response.data;
-};
+}
 
-export const register = async (name, email, password) => {
-  const response = await axiosInstance.post('/auth/register', { 
-    name, 
-    email, 
-    password 
-  });
+export const registerUser = async (userData) => {
+  const response = await axiosInstance.post('/api/auth/register', userData)
   if (response.data.token) {
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('user', JSON.stringify(response.data.user));
   }
   return response.data;
-};
+}
 
-export const logout = async () => {
+export const logoutUser = async () => {
   try {
-    await axiosInstance.post('/auth/logout');
+    const response = await axiosInstance.post('/api/auth/logout')
+    return response.data
   } finally {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   }
-};
+}
+
+export const getCurrentUser = async () => {
+  const response = await axiosInstance.get('/api/auth/me')
+  return response.data
+}

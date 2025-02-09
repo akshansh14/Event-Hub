@@ -45,24 +45,35 @@ function EventDashboard() {
   useEffect(() => {
     dispatch(getEvents(filter))
 
+    if (!user) return
+
     // Connect to socket
     const socket = socketService.connect()
 
     // Listen for event updates
     socket.on('eventUpdated', (data) => {
-      if (data.type === 'newAttendee') {
+      if (data.type === 'newAttendee' || data.type === 'attendeeLeft') {
         // Update the specific event's attendees in the list
         dispatch(updateEventAttendees({
           eventId: data.eventId,
           attendees: data.attendees
         }))
+      } else if (data.type === 'eventModified') {
+        // Refresh the events list
+        dispatch(getEvents(filter))
       }
+    })
+
+    socket.on('eventCancelled', () => {
+      // Refresh the events list when an event is cancelled
+      dispatch(getEvents(filter))
     })
 
     return () => {
       socket.off('eventUpdated')
+      socket.off('eventCancelled')
     }
-  }, [dispatch, filter])
+  }, [dispatch, filter, user])
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)

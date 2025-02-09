@@ -1,110 +1,129 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import { fetchEvents, fetchEventById, createEvent as apiCreateEvent, attendEvent as apiAttendEvent, unattendEvent as apiUnattendEvent, apiUpdateEvent } from "../api/events"
+import { 
+  fetchEvents, 
+  fetchEventById, 
+  createEvent as apiCreateEvent,
+  attendEvent as apiAttendEvent, 
+  unattendEvent as apiUnattendEvent,
+  updateEvent as apiUpdateEvent,
+  deleteEvent as apiDeleteEvent
+} from "../api/events"
 
-export const getEvents = createAsyncThunk("events/getEvents", async (filter) => {
-  const response = await fetchEvents(filter)
-  return response
-})
+// Get all events
+export const getEvents = createAsyncThunk(
+  "events/getEvents",
+  async (filter, { rejectWithValue }) => {
+    try {
+      return await fetchEvents(filter)
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch events')
+    }
+  }
+)
 
-export const getEventById = createAsyncThunk("events/getEventById", async (id) => {
-  const response = await fetchEventById(id)
-  return response
-})
+// Get single event
+export const getEventById = createAsyncThunk(
+  "events/getEventById",
+  async (id, { rejectWithValue }) => {
+    try {
+      return await fetchEventById(id)
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch event')
+    }
+  }
+)
 
+// Create event
 export const createEvent = createAsyncThunk(
   "events/createEvent",
   async (eventData, { rejectWithValue }) => {
     try {
-      const response = await apiCreateEvent(eventData);
-      return response;
+      return await apiCreateEvent(eventData)
     } catch (error) {
-      if (error.response?.status === 401) {
-        window.location.href = '/login';
-      }
-      return rejectWithValue(error.response?.data?.error || 'Failed to create event');
+      return rejectWithValue(error.response?.data?.error || 'Failed to create event')
     }
   }
-);
+)
 
-export const attendEvent = createAsyncThunk(
-  "events/attendEvent",
-  async (eventId, { rejectWithValue }) => {
-    try {
-      const response = await apiAttendEvent(eventId);
-      return response;
-    } catch (error) {
-      if (error.response?.status === 401) {
-        window.location.href = '/login';
-      }
-      return rejectWithValue(
-        error.response?.data?.error || 
-        error.message || 
-        'Failed to attend event'
-      );
-    }
-  }
-);
-
-export const unattendEvent = createAsyncThunk(
-  "events/unattendEvent",
-  async (eventId, { rejectWithValue }) => {
-    try {
-      const response = await apiUnattendEvent(eventId);
-      return response;
-    } catch (error) {
-      if (error.response?.status === 401) {
-        window.location.href = '/login';
-      }
-      return rejectWithValue(
-        error.response?.data?.error || 
-        error.message || 
-        'Failed to leave event'
-      );
-    }
-  }
-);
-
+// Update event
 export const updateEvent = createAsyncThunk(
   "events/updateEvent",
-  async ({ id, ...eventData }, { rejectWithValue }) => {
+  async ({ id, ...updateData }, { rejectWithValue }) => {
     try {
-      const response = await apiUpdateEvent(id, eventData)
-      return response
+      return await apiUpdateEvent(id, updateData)
     } catch (error) {
-      if (error.response?.status === 401) {
-        window.location.href = '/login'
-      }
       return rejectWithValue(error.response?.data?.error || 'Failed to update event')
     }
   }
 )
 
+// Delete event
+export const deleteEvent = createAsyncThunk(
+  "events/deleteEvent",
+  async (id, { rejectWithValue }) => {
+    try {
+      return await apiDeleteEvent(id)
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to delete event')
+    }
+  }
+)
+
+// Attend event
+export const attendEvent = createAsyncThunk(
+  "events/attendEvent",
+  async (eventId, { rejectWithValue }) => {
+    try {
+      return await apiAttendEvent(eventId)
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to attend event')
+    }
+  }
+)
+
+// Unattend event
+export const unattendEvent = createAsyncThunk(
+  "events/unattendEvent",
+  async (eventId, { rejectWithValue }) => {
+    try {
+      return await apiUnattendEvent(eventId)
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to leave event')
+    }
+  }
+)
+
+const initialState = {
+  list: [],
+  currentEvent: null,
+  status: "idle",
+  error: null,
+}
+
 const eventSlice = createSlice({
   name: "events",
-  initialState: {
-    list: [],
-    currentEvent: null,
-    status: "idle",
-    error: null,
-  },
+  initialState,
   reducers: {
     updateEventAttendees: (state, action) => {
-      const { eventId, attendees } = action.payload;
-      // Update current event if it matches
-      if (state.currentEvent && state.currentEvent._id === eventId) {
-        state.currentEvent.attendees = attendees;
+      const { eventId, attendees } = action.payload
+      if (state.currentEvent?._id === eventId) {
+        state.currentEvent.attendees = attendees
       }
-      // Update event in list if it exists
-      const eventInList = state.list.find(e => e._id === eventId);
-      if (eventInList) {
-        eventInList.attendees = attendees;
+      const event = state.list.find(e => e._id === eventId)
+      if (event) {
+        event.attendees = attendees
       }
+    },
+    clearEventError: (state) => {
+      state.error = null
     }
   },
   extraReducers: (builder) => {
     builder
+      // Get Events
       .addCase(getEvents.pending, (state) => {
         state.status = "loading"
+        state.error = null
       })
       .addCase(getEvents.fulfilled, (state, action) => {
         state.status = "succeeded"
@@ -112,10 +131,12 @@ const eventSlice = createSlice({
       })
       .addCase(getEvents.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message
+        state.error = action.payload
       })
+      // Get Event By Id
       .addCase(getEventById.pending, (state) => {
         state.status = "loading"
+        state.error = null
       })
       .addCase(getEventById.fulfilled, (state, action) => {
         state.status = "succeeded"
@@ -123,55 +144,62 @@ const eventSlice = createSlice({
       })
       .addCase(getEventById.rejected, (state, action) => {
         state.status = "failed"
-        state.error = action.error.message
+        state.error = action.payload
+      })
+      // Create Event
+      .addCase(createEvent.pending, (state) => {
+        state.status = "loading"
+        state.error = null
       })
       .addCase(createEvent.fulfilled, (state, action) => {
+        state.status = "succeeded"
         state.list.push(action.payload)
       })
-      .addCase(attendEvent.fulfilled, (state, action) => {
-        state.currentEvent = action.payload
-        state.status = "succeeded"
-      })
-      .addCase(attendEvent.pending, (state) => {
-        state.status = "loading"
-      })
-      .addCase(attendEvent.rejected, (state, action) => {
+      .addCase(createEvent.rejected, (state, action) => {
         state.status = "failed"
         state.error = action.payload
       })
-      .addCase(unattendEvent.fulfilled, (state, action) => {
-        state.currentEvent = action.payload
-        state.status = "succeeded"
-      })
-      .addCase(unattendEvent.pending, (state) => {
-        state.status = "loading"
-      })
-      .addCase(unattendEvent.rejected, (state, action) => {
-        state.status = "failed"
-        state.error = action.payload
-      })
-      .addCase(updateEvent.fulfilled, (state, action) => {
-        // Update in list
-        const index = state.list.findIndex(e => e._id === action.payload._id);
-        if (index !== -1) {
-          state.list[index] = action.payload;
-        }
-        // Update current event if it matches
-        if (state.currentEvent?._id === action.payload._id) {
-          state.currentEvent = action.payload;
-        }
-        state.status = "succeeded";
-      })
+      // Update Event
       .addCase(updateEvent.pending, (state) => {
         state.status = "loading"
+        state.error = null
+      })
+      .addCase(updateEvent.fulfilled, (state, action) => {
+        state.status = "succeeded"
+        const index = state.list.findIndex(event => event._id === action.payload._id)
+        if (index !== -1) {
+          state.list[index] = action.payload
+        }
+        if (state.currentEvent?._id === action.payload._id) {
+          state.currentEvent = action.payload
+        }
       })
       .addCase(updateEvent.rejected, (state, action) => {
         state.status = "failed"
         state.error = action.payload
       })
+      // Attend/Unattend Event
+      .addCase(attendEvent.fulfilled, (state, action) => {
+        const event = state.list.find(e => e._id === action.payload._id)
+        if (event) {
+          event.attendees = action.payload.attendees
+        }
+        if (state.currentEvent?._id === action.payload._id) {
+          state.currentEvent.attendees = action.payload.attendees
+        }
+      })
+      .addCase(unattendEvent.fulfilled, (state, action) => {
+        const event = state.list.find(e => e._id === action.payload._id)
+        if (event) {
+          event.attendees = action.payload.attendees
+        }
+        if (state.currentEvent?._id === action.payload._id) {
+          state.currentEvent.attendees = action.payload.attendees
+        }
+      })
   },
 })
 
-export const { updateEventAttendees } = eventSlice.actions
+export const { updateEventAttendees, clearEventError } = eventSlice.actions
 export default eventSlice.reducer
 
