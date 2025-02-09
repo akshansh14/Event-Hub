@@ -1,5 +1,6 @@
 import { io } from 'socket.io-client';
-import { API_URL } from '../api/config';
+
+const BASE_URL = import.meta.env.VITE_FRONTEND_URL?.replace(/\/$/, '');
 
 class SocketService {
   constructor() {
@@ -8,17 +9,18 @@ class SocketService {
 
   connect() {
     if (!this.socket) {
-      this.socket = io(API_URL, {
+      console.log('Connecting to socket:', BASE_URL);
+      this.socket = io(BASE_URL, {
         withCredentials: true,
         transports: ['websocket'],
+        path: '/socket.io',
         auth: {
           token: localStorage.getItem('token')
         }
       });
 
-      // Add connection event handlers
       this.socket.on('connect', () => {
-        console.log('Socket connected');
+        console.log('Socket connected successfully');
       });
 
       this.socket.on('connect_error', (error) => {

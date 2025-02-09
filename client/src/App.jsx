@@ -10,6 +10,7 @@ import EventCreation from "./pages/EventCreation"
 import EventDetails from "./pages/EventDetails"
 import { Toaster } from 'react-hot-toast'
 import SocketInitializer from './components/SocketInitializer'
+import ApiTest from './components/ApiTest'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             </Routes>
           </main>
           <Toaster position="top-right" />
+          <ApiTest />
         </div>
       </Router>
     </Provider>
