@@ -1,40 +1,327 @@
 "use client"
 
-import { useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { useEffect, useState, useMemo } from "react"
+import { useParams, useNavigate, Link } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import { getEventById } from "../store/eventSlice"
+import { motion } from "framer-motion"
+import { 
+  ArrowLeft, 
+  Calendar, 
+  MapPin, 
+  User, 
+  Users, 
+  Plus, 
+  X,
+  Clock
+} from "lucide-react"
+import { getEventById, attendEvent, unattendEvent, updateEventAttendees } from "../store/eventSlice"
+import socketService from "../utils/socketService"
+import toast from 'react-hot-toast'
 
 function EventDetails() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const { currentEvent: event, status, error } = useSelector((state) => state.events)
   const user = useSelector((state) => state.auth.user)
+  const [viewerCount, setViewerCount] = useState(0)
+
+  // Update how we check if user is attending
+  const isUserAttending = useMemo(() => {
+    if (!event?.attendees || !user) return false;
+    
+    return event.attendees.some(attendee => {
+      if (typeof attendee === 'string') {
+        return attendee === user._id;
+      }
+      return attendee._id === user._id;
+    });
+  }, [event?.attendees, user]);
+  const isCreator = event?.creator?._id === user?._id;
+
+  const handleAttendance = async () => {
+    try {
+      if (isUserAttending) {
+        await dispatch(unattendEvent(id)).unwrap();
+        toast.success("You've left the event");
+      } else {
+        await dispatch(attendEvent(id)).unwrap();
+        toast.success("You're now attending this event!");
+      }
+    } catch (error) {
+      // Extract error message from the error object
+      const errorMessage = error?.response?.data?.error || error?.message || 'Failed to update attendance';
+      toast.error(errorMessage);
+    }
+  };
 
   useEffect(() => {
     dispatch(getEventById(id))
-  }, [dispatch, id])
 
-  if (status === "loading") return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
-  if (!event) return null
+    // Connect to socket and join event room
+    const socket = socketService.connect()
+    socketService.joinEventRoom(id)
+
+    // Socket event listeners
+    socket.on('viewerCount', ({ count }) => {
+      setViewerCount(count)
+    })
+
+    socket.on('eventUpdated', (data) => {
+      if (data.eventId === id) {
+        if (data.type === 'newAttendee') {
+          // Update attendees list in real-time
+          dispatch(updateEventAttendees({
+            eventId: data.eventId,
+            attendees: data.attendees
+          }));
+          toast.success(data.message);
+        } else {
+          // Refresh full event data for other updates
+          dispatch(getEventById(id));
+        }
+      }
+    })
+
+    socket.on('eventCancelled', (data) => {
+      if (data.eventId === id) {
+        toast.error(data.message)
+        navigate('/events')
+      }
+    })
+
+    // Cleanup
+    return () => {
+      socketService.leaveEventRoom(id)
+      socket.off('viewerCount')
+      socket.off('eventUpdated')
+      socket.off('eventCancelled')
+    }
+  }, [dispatch, id, navigate])
+
+  // Add this function to format join date
+  const formatJoinDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.6,
+        when: "beforeChildren",
+        staggerChildren: 0.2
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <motion.div 
+          initial={{ rotate: 0 }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"
+        />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-gray-600">Event not found</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="text-3xl font-bold mb-4">{event.name}</h2>
-      <img
-        src={event.image || "/placeholder.svg"}
-        alt={event.name}
-        className="w-full h-64 object-cover rounded-lg mb-4"
-      />
-      <p className="text-gray-600 mb-4">{new Date(event.date).toLocaleString()}</p>
-      <p className="mb-4">{event.description}</p>
-      <p className="text-gray-600 mb-4">Category: {event.category}</p>
-      <p className="text-gray-600 mb-4">Attendees: {event.attendees.length}</p>
-      {user && !event.attendees.includes(user._id) && (
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Attend Event</button>
-      )}
-    </div>
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="min-h-screen bg-gray-50 pt-20"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <motion.div 
+          variants={itemVariants}
+          className="mb-6"
+        >
+          <Link
+            to="/events"
+            className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            <span className="font-medium">Back to Events</span>
+          </Link>
+        </motion.div>
+
+        <motion.div 
+          variants={itemVariants}
+          className="bg-white rounded-xl shadow-sm overflow-hidden"
+        >
+          {event.image ? (
+            <motion.img
+              initial={{ scale: 1.1 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.6 }}
+              src={event.image}
+              alt={event.name}
+              className="w-full h-64 object-cover"
+            />
+          ) : (
+            <motion.div 
+              initial={{ scale: 1.1 }}
+              animate={{ scale: 1 }}
+              className="w-full h-64 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center"
+            >
+              <span className="text-white text-4xl font-bold">
+                {event.name.charAt(0)}
+              </span>
+            </motion.div>
+          )}
+          
+          <div className="p-6">
+            <motion.div 
+              variants={itemVariants}
+              className="flex items-center justify-between mb-4"
+            >
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                {event.category}
+              </span>
+              {user && !isCreator && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleAttendance}
+                  className={`
+                    px-6 py-2 rounded-full font-medium transition-colors
+                    ${isUserAttending 
+                      ? "bg-red-100 text-red-600 hover:bg-red-200"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                    }
+                  `}
+                >
+                  <span className="flex items-center space-x-2">
+                    {isUserAttending ? (
+                      <>
+                        <X className="w-5 h-5" />
+                        <span>Leave Event</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-5 h-5" />
+                        <span>Attend Event</span>
+                      </>
+                    )}
+                  </span>
+                </motion.button>
+              )}
+            </motion.div>
+
+            <motion.h1 
+              variants={itemVariants}
+              className="text-3xl font-bold text-gray-900 mb-4"
+            >
+              {event.name}
+            </motion.h1>
+
+            <motion.div 
+              variants={itemVariants}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+            >
+              <div className="space-y-4">
+                <div className="flex items-center text-gray-600">
+                  <Calendar className="w-5 h-5 mr-2" />
+                  <span>{new Date(event.date).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Clock className="w-5 h-5 mr-2" />
+                  <span>{event.time}</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <MapPin className="w-5 h-5 mr-2" />
+                  <span>{event.location}</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <User className="w-5 h-5 mr-2" />
+                  <span>Created by {event.creator?.name}</span>
+                </div>
+              </div>
+
+              <motion.div 
+                variants={itemVariants}
+                className="space-y-4"
+              >
+                <h3 className="font-semibold text-gray-900">Description</h3>
+                <p className="text-gray-600 whitespace-pre-wrap">
+                  {event.description}
+                </p>
+              </motion.div>
+            </motion.div>
+
+            <motion.div 
+              variants={itemVariants}
+              className="border-t pt-6"
+            >
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                <Users className="w-5 h-5 mr-2" />
+                Attendees ({event.attendees?.length || 0})
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {event.attendees && event.attendees.length > 0 ? (
+                  event.attendees.map((attendee, index) => (
+                    <motion.div 
+                      key={attendee._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50"
+                    >
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 font-medium">
+                          {attendee.name ? attendee.name.charAt(0) : '?'}
+                        </span>
+                      </div>
+                      <span className="text-gray-700 font-medium">
+                        {attendee.name || 'Anonymous'}
+                      </span>
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div 
+                    variants={itemVariants}
+                    className="col-span-full text-center py-4 text-gray-500"
+                  >
+                    No attendees yet. Be the first to join!
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
   )
 }
 
