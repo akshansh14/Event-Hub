@@ -8,40 +8,35 @@ function ApiTest() {
   useEffect(() => {
     const testConnection = async () => {
       try {
-        // Try root endpoint first
-        const rootResponse = await axiosInstance.get('/');
-        console.log('Root response:', rootResponse.data);
-
-        // Then try test endpoint
-        const testResponse = await axiosInstance.get('/api/test');
-        console.log('Test response:', testResponse.data);
-
-        setStatus(`API Connected: ${testResponse.data.message}`);
+        const response = await axiosInstance.get('/api/test');
+        console.log('Test response:', response.data);
+        setStatus(`API Connected: ${response.data.message}`);
       } catch (err) {
         console.error('API Test Error:', {
           message: err.message,
           response: err.response?.data,
           status: err.response?.status
         });
-        setError(`${err.message} - ${err.response?.data?.error || 'Unknown error'}`);
-        setStatus('API Connection Failed');
+        // Just log the error, don't show it in UI
+        setStatus('Checking API connection...');
       }
     };
 
     testConnection();
   }, []);
 
-  return (
-    <div className="fixed bottom-4 right-4 p-4 bg-gray-800 text-white rounded-lg shadow-lg">
-      <h3 className="font-bold mb-2">API Status</h3>
-      <p className="mb-2">{status}</p>
-      {error && (
-        <p className="text-red-400 text-sm">
-          Error: {error}
-        </p>
-      )}
-    </div>
-  );
+  // Only show status when connected successfully
+  if (status.includes('API Connected')) {
+    return (
+      <div className="fixed bottom-4 right-4 p-4 bg-gray-800 text-white rounded-lg shadow-lg">
+        <h3 className="font-bold mb-2">API Status</h3>
+        <p className="mb-2">{status}</p>
+      </div>
+    );
+  }
+
+  // Return null when not connected
+  return null;
 }
 
 export default ApiTest; 
