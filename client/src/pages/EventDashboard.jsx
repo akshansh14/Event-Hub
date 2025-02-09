@@ -12,7 +12,6 @@ import {
   Search,
   Filter,
   Clock,
-  Tag,
   ChevronRight
 } from "lucide-react"
 import { getEvents, updateEventAttendees } from "../store/eventSlice"
